@@ -1,17 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import WaterLog from './WaterLog';
 import WaterBottleProgress from './WaterBottleProgress'; // Import the WaterBottleProgress component
 import { addWaterIntake } from '../controller/WaterController';
+import { Auth, API, graphqlOperation } from 'aws-amplify';
+import {listWaterLogs} from '../graphql/queries';
+import { createWaterLog } from '../graphql/mutations';
 
 function WaterTracker() {
   const [logs, setLogs] = useState([]); // State to hold water intake logs
   const [goal, setGoal] = useState(124); // State for the daily water intake goal, defaulting to 124 fl oz
   const [customAmount, setCustomAmount] = useState(''); // State to hold the custom water amount
 
+  useEffect(() => {
+    const fetchWaterLogs = async () => {
+      try {
+        await Auth.currentAuthenticatedUser();
+        console.log('user authenticated', Auth.currentAuthenticatedUser());
+      } catch (error) {
+        console.error('Error fetching water logs:', error);
+      }
+
+      try {
+        const waterLogsData = await API.graphql(graphqlOperation(listWaterLogs));
+        const waterLogs = waterLogsData.data.listWaterLogs.items;
+        setLogs(waterLogs);
+      } catch (err) {
+        console.error('Error fetching water logs:', err);
+      }
+    };
+    fetchWaterLogs();
+  });
+
   // Function to handle adding a new water intake log
-  const handleAddWater = (amount) => {
-    const newLog = addWaterIntake(amount);
-    setLogs([...logs, newLog]);
+  const handleAddWater = async (amount) => {
+    const currentUser = await Auth.currentAuthenticatedUser();
+    const userId = currentUser.attributes.sub;
+
+    const newLog = { 
+      amount,
+      timestamp: new Date().toISOString(),
+      userID: userId,
+    };
+    try {
+      await API.graphql(graphqlOperation(createWaterLog, {input: newLog}));
+      setLogs([...logs, newLog]);
+    } catch (err) {
+      console.error('Error adding water log:', err);
+    }
   };
 
   // Function to reset the water intake logs
