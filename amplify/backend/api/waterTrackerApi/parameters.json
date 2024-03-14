@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "waterTrackerApi",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authitis4340watertracker770e2817",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

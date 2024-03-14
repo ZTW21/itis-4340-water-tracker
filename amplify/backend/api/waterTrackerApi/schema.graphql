@@ -1,0 +1,12 @@
+type WaterLog @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  amount: Float!
+  timestamp: AWSDateTime!
+  user: User @belongsTo(fields: ["userID"])
+  userID: ID! @index(name: "byUser", sortKeyFields: ["timestamp"])
+}
+
+type User @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  waterLogs: [WaterLog] @hasMany(indexName: "byUser", fields: ["id"])
+}
