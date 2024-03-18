@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import WaterLog from './WaterLog';
 import WaterBottleProgress from './WaterBottleProgress'; // Import the WaterBottleProgress component
-import { addWaterIntake } from '../controller/WaterController';
 import { Auth, API, graphqlOperation } from 'aws-amplify';
 import {listWaterLogs} from '../graphql/queries';
-import { createWaterLog } from '../graphql/mutations';
+import { createWaterLog, deleteWaterLog } from '../graphql/mutations';
 
 function WaterTracker() {
   const [logs, setLogs] = useState([]); // State to hold water intake logs
@@ -15,44 +14,65 @@ function WaterTracker() {
     const fetchWaterLogs = async () => {
       try {
         await Auth.currentAuthenticatedUser();
-        console.log('user authenticated', Auth.currentAuthenticatedUser());
-      } catch (error) {
-        console.error('Error fetching water logs:', error);
-      }
-
-      try {
-        const waterLogsData = await API.graphql(graphqlOperation(listWaterLogs));
+        const waterLogsData = await API.graphql(graphqlOperation(listWaterLogs), {
+          authMode: "AMAZON_COGNITO_USER_POOLS"
+        });
         const waterLogs = waterLogsData.data.listWaterLogs.items;
         setLogs(waterLogs);
       } catch (err) {
         console.error('Error fetching water logs:', err);
       }
     };
+    
     fetchWaterLogs();
   });
 
   // Function to handle adding a new water intake log
   const handleAddWater = async (amount) => {
-    const currentUser = await Auth.currentAuthenticatedUser();
-    const userId = currentUser.attributes.sub;
-
-    const newLog = { 
-      amount,
-      timestamp: new Date().toISOString(),
-      userID: userId,
-    };
     try {
-      await API.graphql(graphqlOperation(createWaterLog, {input: newLog}));
+      const currentUser = await Auth.currentAuthenticatedUser();
+      const userId = currentUser.attributes.sub;
+  
+      const newLog = {
+        amount,
+        timestamp: new Date().toISOString(),
+        userID: userId,
+      };
+  
+      await API.graphql(graphqlOperation(createWaterLog, { input: newLog }), {
+        authMode: "AMAZON_COGNITO_USER_POOLS"
+      });
       setLogs([...logs, newLog]);
     } catch (err) {
       console.error('Error adding water log:', err);
     }
-  };
+  };    
 
   // Function to reset the water intake logs
-  const handleReset = () => {
-    setLogs([]);
+  const handleReset = async () => {
+    try {
+      // const currentUser = await Auth.currentAuthenticatedUser();
+      // const userId = currentUser.attributes.sub;
+  
+      // Assuming logs state contains all the current user's logs
+      const deletePromises = logs.map((log) => {
+        const deleteInput = { id: log.id };
+        return API.graphql(graphqlOperation(deleteWaterLog, { input: deleteInput }), {
+          authMode: "AMAZON_COGNITO_USER_POOLS"
+        });
+      });
+  
+      // Wait for all delete operations to complete
+      await Promise.all(deletePromises);
+  
+      // Clear logs from the state after successful deletion
+      setLogs([]);
+  
+    } catch (err) {
+      console.error('Error resetting water logs:', err);
+    }
   };
+  
 
   // Function to update the daily water intake goal
   const handleGoalChange = (e) => {

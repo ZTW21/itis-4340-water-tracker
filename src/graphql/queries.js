@@ -44,38 +44,6 @@ export const listWaterLogs = /* GraphQL */ `
     }
   }
 `;
-export const waterLogsByUserIDAndTimestamp = /* GraphQL */ `
-  query WaterLogsByUserIDAndTimestamp(
-    $userID: ID!
-    $timestamp: ModelStringKeyConditionInput
-    $sortDirection: ModelSortDirection
-    $filter: ModelWaterLogFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    waterLogsByUserIDAndTimestamp(
-      userID: $userID
-      timestamp: $timestamp
-      sortDirection: $sortDirection
-      filter: $filter
-      limit: $limit
-      nextToken: $nextToken
-    ) {
-      items {
-        id
-        amount
-        timestamp
-        userID
-        createdAt
-        updatedAt
-        owner
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
 export const getUser = /* GraphQL */ `
   query GetUser($id: ID!) {
     getUser(id: $id) {
@@ -100,6 +68,38 @@ export const listUsers = /* GraphQL */ `
     listUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
+        createdAt
+        updatedAt
+        owner
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const waterLogsByUserIDAndTimestamp = /* GraphQL */ `
+  query WaterLogsByUserIDAndTimestamp(
+    $userID: ID!
+    $timestamp: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelWaterLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    waterLogsByUserIDAndTimestamp(
+      userID: $userID
+      timestamp: $timestamp
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        amount
+        timestamp
+        userID
         createdAt
         updatedAt
         owner

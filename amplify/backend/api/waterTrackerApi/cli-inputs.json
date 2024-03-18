@@ -4,14 +4,10 @@
     "apiName": "waterTrackerApi",
     "serviceName": "AppSync",
     "defaultAuthType": {
-      "mode": "API_KEY",
-      "expirationTime": 7
+      "mode": "AMAZON_COGNITO_USER_POOLS",
+      "cognitoUserPoolId": "authitis4340watertracker770e2817"
     },
-    "additionalAuthTypes": [
-      {
-        "mode": "AMAZON_COGNITO_USER_POOLS",
-        "cognitoUserPoolId": "authitis4340watertracker770e2817"
-      }
-    ]
+    "additionalAuthTypes": [],
+    "conflictResolution": {}
   }
 }
