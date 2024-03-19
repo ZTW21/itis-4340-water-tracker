@@ -15,6 +15,15 @@ function WaterLog({ log, onDelete }) {
   // Remove leading zero from hours less than 10
   formattedDate = formattedDate.replace(/(\s)0(\d:\d{2}\s\w{2})/, "$1$2");
 
+  // Helper function to format the water amount
+  const formatAmount = (amount) => {
+    // Check if the amount is an integer or a decimal with less than 3 decimal places
+    if (Number.isInteger(amount) || !/(.*\.\d{3,})/.test(amount.toString())) {
+      return amount; // Return the amount as is
+    }
+    return amount.toFixed(2); // Round to two decimal places if necessary
+  };
+
   // Handle clicking the delete button
   const handleDeleteClick = () => {
     onDelete(log.id);
@@ -29,8 +38,8 @@ function WaterLog({ log, onDelete }) {
       >
         X
       </button>
-      <span>{`${log.amount} fl oz at ${formattedDate}`}</span>
-      
+      <span>{`${formatAmount(log.amount)} fl oz at ${formattedDate}`}</span>
+
     </div>
   );
 }
