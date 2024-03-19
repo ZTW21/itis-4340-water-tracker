@@ -90,7 +90,12 @@ function WaterTracker() {
 
   // Function to update the daily water intake goal
   const handleGoalChange = (e) => {
-    setGoal(e.target.value);
+    const newGoal = e.target.value;
+    if (newGoal >= 0) {
+      setGoal(newGoal);
+    }
+
+    // setGoal(e.target.value);
   };
 
   const handleAddCustomAmount = () => {
@@ -121,6 +126,7 @@ function WaterTracker() {
         <input
           id="goalInput"
           type="number"
+          min="0"
           value={goal}
           onChange={handleGoalChange}
           step="8"
@@ -143,8 +149,6 @@ function WaterTracker() {
             />
             <button className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" onClick={handleAddCustomAmount}>Add</button>
           </div>
-
-
           <button className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={handleReset}>Reset</button>
         </div>
         {/* Display total water intake */}

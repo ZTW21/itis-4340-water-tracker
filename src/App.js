@@ -12,18 +12,17 @@ Amplify.configure(awsExports);
 
 function App() {
   useEffect(() => {
+    // Set the page title
     document.title = 'Drink!';
   }, []);
 
+  // Function to handle signing out
   const signOut =  async () => {
-    
-
     try {
       await Auth.signOut();
     } catch (error) {
       console.log('error signing out: ', error);
     }
-  
   }
 
   return (
