@@ -1,3 +1,5 @@
+import React, { useEffect } from 'react';
+
 import WaterTracker from './components/WaterTracker';
 import './amplify-authenticator-custom.css';
 
@@ -9,7 +11,13 @@ import '@aws-amplify/ui-react/styles.css';
 Amplify.configure(awsExports);
 
 function App() {
+  useEffect(() => {
+    document.title = 'Drink!';
+  }, []);
+
   const signOut =  async () => {
+    
+
     try {
       await Auth.signOut();
     } catch (error) {
