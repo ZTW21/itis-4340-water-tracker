@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import WaterLog from './WaterLog';
 import WaterBottleProgress from './WaterBottleProgress'; // Import the WaterBottleProgress component
 import { Auth, API, graphqlOperation } from 'aws-amplify';
-import {listWaterLogs} from '../graphql/queries';
+import { listWaterLogs } from '../graphql/queries';
 import { createWaterLog, deleteWaterLog } from '../graphql/mutations';
 
 function WaterTracker() {
@@ -23,7 +23,7 @@ function WaterTracker() {
         console.error('Error fetching water logs:', err);
       }
     };
-    
+
     fetchWaterLogs();
   });
 
@@ -32,13 +32,13 @@ function WaterTracker() {
     try {
       const currentUser = await Auth.currentAuthenticatedUser();
       const userId = currentUser.attributes.sub;
-  
+
       const newLog = {
         amount,
         timestamp: new Date().toISOString(),
         userID: userId,
       };
-  
+
       await API.graphql(graphqlOperation(createWaterLog, { input: newLog }), {
         authMode: "AMAZON_COGNITO_USER_POOLS"
       });
@@ -46,14 +46,28 @@ function WaterTracker() {
     } catch (err) {
       console.error('Error adding water log:', err);
     }
-  };    
+  };
+
+  const deleteWaterLogById = async (logId) => {
+    try {
+      await API.graphql(graphqlOperation(deleteWaterLog, { input: { id: logId } }), {
+        authMode: "AMAZON_COGNITO_USER_POOLS"
+      });
+
+      // Filter out the deleted log from the current state
+      const updatedLogs = logs.filter(log => log.id !== logId);
+      setLogs(updatedLogs);
+    } catch (err) {
+      console.error('Error deleting water log:', err);
+    }
+  };
 
   // Function to reset the water intake logs
   const handleReset = async () => {
     try {
       // const currentUser = await Auth.currentAuthenticatedUser();
       // const userId = currentUser.attributes.sub;
-  
+
       // Assuming logs state contains all the current user's logs
       const deletePromises = logs.map((log) => {
         const deleteInput = { id: log.id };
@@ -61,18 +75,18 @@ function WaterTracker() {
           authMode: "AMAZON_COGNITO_USER_POOLS"
         });
       });
-  
+
       // Wait for all delete operations to complete
       await Promise.all(deletePromises);
-  
+
       // Clear logs from the state after successful deletion
       setLogs([]);
-  
+
     } catch (err) {
       console.error('Error resetting water logs:', err);
     }
   };
-  
+
 
   // Function to update the daily water intake goal
   const handleGoalChange = (e) => {
@@ -129,15 +143,15 @@ function WaterTracker() {
             />
             <button className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" onClick={handleAddCustomAmount}>Add</button>
           </div>
-          
+
 
           <button className="btn bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={handleReset}>Reset</button>
         </div>
         {/* Display total water intake */}
         <h2 className="font-semibold mb-4">Total Intake: {totalIntake.toFixed(1)} fl oz</h2>
         {/* Renders each log entry */}
-        {logs.map((log, index) => (
-          <WaterLog key={index} log={log} />
+        {logs.map((log) => (
+          <WaterLog key={log.id} log={log} onDelete={deleteWaterLogById} />
         ))}
       </div>
       {/* Water bottle progress visual */}
